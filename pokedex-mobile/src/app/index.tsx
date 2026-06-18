@@ -1,108 +1,70 @@
-import { Pokemon, PokemonListItem } from "@/types/pokemon";
-import { useEffect, useState } from "react";
-import { Text, View, Image, ScrollView, StyleSheet, Pressable } from "react-native";
-import { Link } from "../../.expo/types/router";
+import { FlashList } from '@shopify/flash-list'
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { PokemonCard } from '@/components/pokemon-card'
+import { usePokemonList } from '@/hooks/use-pokemon-list'
+import type { PokemonListItem } from '@/types/pokemon'
 
-export default function Index() {
-	const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+export default function PokemonListScreen() {
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePokemonList()
 
-	useEffect(() => {
-		fetchPokemons()
-	}, []);
-
-    const colorsByType: Record<string, string> = {
-        grass: "#78C850",
-        fire: "#F08030",
-        water: "#6890F0",
-        bug: "#A8B820",
-        normal: "#A8A878",
-        poison: "#A040A0",
-        electric: "#F8D030",
-        ground: "#E0C068",
-        fairy: "#EE99AC",
-        fighting: "#C03028",
-        psychic: "#F85888",
-        rock: "#B8A038",
-        ghost: "#705898",
-        ice: "#98D8D8",
-        dragon: "#7038F8"
-    }
-
-	async function fetchPokemons() {
-		try {
-			const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=10");
-
-			const data = await response.json();
-
-			const pokemonDetails = await Promise.all(
-				data.results.map(async (pokemon: Pokemon) => {
-					const response = await fetch(pokemon.url);
-					const data = await response.json();
-					return {
-						id: data.id,
-						name: data.name,
-						sprites: data.sprites,
-						types: data.types
-					};
-				})
-			)
-
-			setPokemons(pokemonDetails);
-		} catch (error) {
-			console.log(error);
-		}
-	}
-
+  if (isLoading) {
     return (
-        <ScrollView
-            contentContainerStyle={{
-                gap: 16,
-                padding: 16,
-            }}
-        >
-            {pokemons.map((pokemon) => (
-                <Link
-                    key={pokemon.name}
-                    href={""}
-                    style={{
-                        backgroundColor: colorsByType[pokemon.types[0]?.type.name as keyof typeof colorsByType] + 50 || "#fff",
-                        padding: 20,
-                        borderRadius: 20,
-                    }}
-                >
-                    <View key={pokemon.name}>
-                        <Text style={styles.name}>{pokemon.name}</Text>
-                        <Text style={styles.type}>{pokemon.types[0]?.type.name}</Text>
-                        <View style={{ 
-                            flexDirection: "row" ,
-                            justifyContent: "center",
-                            alignItems: "center"
-                        }}>
-                            <Image
-                                source={{ uri: pokemon.sprites.front_default }}
-                                style={{ width: 100, height: 100 }}
-                            />
-                            <Image
-                                source={{ uri: pokemon.sprites.back_default }}
-                                style={{ width: 100, height: 100 }}
-                            />
-                        </View>
-                    </View>
-                </Link>
-            ))}
-		</ScrollView>
-    );
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    )
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Something went wrong. Please try again.</Text>
+      </View>
+    )
+  }
+
+  const pokemon = data?.pages.flatMap((page) => page.results) ?? []
+
+  return (
+    <FlashList
+      data={pokemon}
+      numColumns={2}
+      estimatedItemSize={150}
+      keyExtractor={(item: PokemonListItem) => item.name}
+      renderItem={({ item }) => <PokemonCard pokemon={item} />}
+      onEndReached={() => hasNextPage && fetchNextPage()}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={
+        isFetchingNextPage ? (
+          <ActivityIndicator style={styles.footer} />
+        ) : null
+      }
+      contentContainerStyle={styles.list}
+    />
+  )
 }
 
 const styles = StyleSheet.create({
-    name: {
-        fontSize: 20,
-        fontWeight: "bold",
-        textAlign: "center",
-    },
-    type: {
-        fontSize: 16,
-        fontStyle: "italic",
-        textAlign: "center",
-    }
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  list: {
+    padding: 8,
+  },
+  footer: {
+    paddingVertical: 16,
+  },
 })

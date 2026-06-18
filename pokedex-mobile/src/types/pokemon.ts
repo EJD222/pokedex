@@ -1,36 +1,63 @@
 export type PokemonListItem = {
-	name: string
-	url: string
-	frontImage: string
-	backImage: string
+  name: string
+  url: string
 }
 
 export type PokemonListResponse = {
-	count: number
-	next: string | null
-	results: PokemonListItem[]
+  count: number
+  next: string | null
+  previous: string | null
+  results: PokemonListItem[]
+}
+
+export type PokemonType = {
+  slot: number
+  type: {
+    name: string
+    url: string
+  }
+}
+
+export type PokemonStat = {
+  base_stat: number
+  effort: number
+  stat: {
+    name: string
+    url: string
+  }
+}
+
+export type PokemonAbility = {
+  ability: {
+    name: string
+    url: string
+  }
+  is_hidden: boolean
+  slot: number
+}
+
+export type PokemonSprites = {
+  front_default: string | null
+  front_shiny: string | null
+  other: {
+    'official-artwork': {
+      front_default: string | null
+      front_shiny: string | null
+    }
+    dream_world: {
+      front_default: string | null
+    }
+  }
 }
 
 export type Pokemon = {
-	id: number
-	name: string
-	url: string
-	height: number
-	weight: number
-	sprites: {
-		front_default: string
-		back_default: string
-	}
-	types: {
-        type: PokemonTypes
-    }[]
-	stats: {
-		base_stat: number
-		stat: { name: string }
-	}[]
-}
-
-export type PokemonTypes = {
-	name: string
-	url: string
+  id: number
+  name: string
+  height: number
+  weight: number
+  base_experience: number
+  sprites: PokemonSprites
+  types: PokemonType[]
+  stats: PokemonStat[]
+  abilities: PokemonAbility[]
 }
