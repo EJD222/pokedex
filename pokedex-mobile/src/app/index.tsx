@@ -1,7 +1,7 @@
 import { Pokemon } from "@/types/pokemon";
+import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View, Image, ScrollView, StyleSheet, Pressable } from "react-native";
-import { router } from "expo-router";
 
 const colorsByType: Record<string, string> = {
     grass: "#78C850",
@@ -63,9 +63,9 @@ export default function Index() {
                 const bgColor = (colorsByType[typeName] ?? "#A8A878") + "50";
 
                 return (
-                    <Pressable
+                    <Link
                         key={pokemon.name}
-                        onPress={() => router.push(`/pokemon/${pokemon.id}`)}
+                        href={{ pathname: "/pokemon-details", params: { name: pokemon.name } }}
                         style={{ backgroundColor: bgColor, padding: 20, borderRadius: 20 }}
                     >
                         <Text style={styles.name}>{pokemon.name}</Text>
@@ -80,7 +80,7 @@ export default function Index() {
                                 style={{ width: 100, height: 100 }}
                             />
                         </View>
-                    </Pressable>
+                    </Link>
                 );
             })}
         </ScrollView>

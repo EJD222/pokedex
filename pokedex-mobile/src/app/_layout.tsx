@@ -4,7 +4,12 @@ export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: "Pokédex" }} />
-      <Stack.Screen name="pokemon/[id]" options={{ title: "Pokemon Details" }} />
+      <Stack.Screen 
+        name="pokemon-details"
+        options={{ 
+            title: "Pokemon Details",
+            headerBackButtonDisplayMode: "minimal",
+        }} />
     </Stack>
   );
 }
